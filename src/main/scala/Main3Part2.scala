@@ -2,12 +2,21 @@ import Helpers._
 
 object Main3Part2 {
 
+  private def intersectAll[A](sets: List[Set[A]]): Set[A] = {
+    sets match {
+      case Nil          => Set.empty
+      case head :: Nil  => head
+      case head :: tail => head.intersect(intersectAll(tail))
+    }
+  }
+
   def main(args: Array[String]): Unit =
     println(
       loadLines("input3.txt")
         .grouped(3)
         .toList
-        .map(group => group(0).toSet.intersect(group(1).toSet).intersect(group(2).toSet))
+        .map(_.map(_.toSet))
+        .map(intersectAll)
         .map(_.map(scoreItem).sum)
         .sum
     )
