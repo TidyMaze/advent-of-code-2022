@@ -32,13 +32,16 @@ object Main7Part1 {
     }
   }
 
+  def totalFileSize(tree: Tree): Long = {
+    tree match {
+      case File(_, size) => size
+      case Directory(_, files, dirs) =>
+        files.map(_.size).sum + dirs.map(totalFileSize).sum
+    }
+  }
+
   def findDirectorySizes(directory: Directory): Map[String, Long] = {
-    val filesSize = directory.files.map(_.size).sum
-    val childDirSizes =
-      directory.dirs.map(findDirectorySizes).foldLeft(Map.empty[String, Long]) {
-        case (acc, dirSizes) => acc ++ dirSizes
-      }
-    childDirSizes + (directory.name -> (filesSize + childDirSizes.values.sum))
+    directory.dirs.map(findDirectorySizes).flatten.toMap + (directory.name -> totalFileSize(directory))
   }
 
   def main(args: Array[String]): Unit = {
@@ -73,7 +76,7 @@ object Main7Part1 {
         }
         println(
 //          s"at ${acc._2} with ${next} got path ${stepRes._2} and tree\n${stepRes._1}"
-        s"at ${acc._2} with ${next} got path ${stepRes._2}"
+          s"at ${acc._2} with ${next} got path ${stepRes._2}"
         )
         stepRes
       })
@@ -85,7 +88,7 @@ object Main7Part1 {
     println("directory sizes:\n" + directorySizes)
 
     val smallDirs = directorySizes.filter(_._2 <= 100000)
-    
+
     println("small dirs:\n" + smallDirs)
     println(smallDirs.values.sum)
   }
