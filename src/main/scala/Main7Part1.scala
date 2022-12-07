@@ -25,10 +25,7 @@ object Main7Part1 {
     override def toString: String = {
       // tree as indented string
       val filesStr = files.map(_.toString).map("  " + _).mkString("\n")
-      val dirsStr = dirs
-        .map(_.toString)
-        .map(_.linesIterator.map("  " + _).mkString("\n"))
-        .mkString("\n")
+      val dirsStr = dirs.map(_.toString.split("\n").map("  " + _).mkString("\n")).mkString("\n")
       s"$name\n$filesStr\n$dirsStr"
     }
   }
