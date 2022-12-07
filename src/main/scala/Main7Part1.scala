@@ -32,24 +32,17 @@ object Main7Part1 {
         else
           dirs
             .map(_.toString.split("\n").map("  " + _).mkString("\n"))
-            .mkString("\n") + "\n"
+            .mkString("\n")
       s"$name\n$filesStr$dirsStr"
     }
   }
 
-  def totalFileSize(tree: Tree): Long = {
-    tree match {
-      case File(_, size) => size
-      case Directory(_, files, dirs) =>
-        files.map(_.size).sum + dirs.map(totalFileSize).sum
-    }
-  }
-
   def findDirectorySizes(directory: Directory): Map[String, Long] = {
-    directory.dirs
-      .map(findDirectorySizes)
-      .flatten
-      .toMap + (directory.name -> totalFileSize(directory))
+    val filesSize = directory.files.map(_.size).sum
+    val dirsSize = directory.dirs.map(findDirectorySizes).foldLeft(Map.empty[String, Long]) {
+      case (acc, dir) => acc ++ dir
+    }
+    dirsSize + (directory.name -> (filesSize + dirsSize.values.sum))
   }
 
   def main(args: Array[String]): Unit = {
