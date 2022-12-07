@@ -23,13 +23,13 @@ object Main7Part1 {
   case class Directory(name: String, files: List[File], dirs: List[Directory])
       extends Tree {
     override def toString: String = {
-      val filesStr =
-        files.map(f => s"${f.toString}")
-      val dirsStr =
-        dirs.map(d => s"${d.toString}")
-      val mainStr = s"$name (dir count: ${dirs.size}, file count: ${files.size})"
-      
-        (mainStr :: filesStr ::: dirsStr).map(l => s"  $l").mkString("\n")
+      // tree as indented string
+      val filesStr = files.map(_.toString).map("  " + _).mkString("\n")
+      val dirsStr = dirs
+        .map(_.toString)
+        .map(_.linesIterator.map("  " + _).mkString("\n"))
+        .mkString("\n")
+      s"$name\n$filesStr\n$dirsStr"
     }
   }
 
@@ -46,22 +46,30 @@ object Main7Part1 {
             other.dropWhile(_.isDigit).drop(1)
           )
       }
+      .drop(1)
+    println(parsed)
+
     val builtTree = parsed
       .foldLeft(
         (Directory("/", List.empty, List.empty), List.empty[String])
-      ) {
-        case (acc, Ls) => acc
-        case ((tree, currentPath), cd: Cd) if cd.path == ".." =>
-          (tree, currentPath.dropRight(1))
-        case ((tree, currentPath), cd: Cd) => (tree, currentPath :+ cd.path)
-        case ((tree, currentPath), fileSizeOutput: FileSizeOutput) =>
-          (updated(tree, currentPath, fileSizeOutput), currentPath)
-        case ((tree, currentPath), dirOutput: DirOutput) =>
-          (updated(tree, currentPath, dirOutput), currentPath)
-      }
-    println(parsed)
+      )((acc, next) => {
+        val stepRes = (acc, next) match {
+          case (acc, Ls) => acc
+          case ((tree, currentPath), cd: Cd) if cd.path == ".." =>
+            (tree, currentPath.dropRight(1))
+          case ((tree, currentPath), cd: Cd) => (tree, currentPath :+ cd.path)
+          case ((tree, currentPath), fileSizeOutput: FileSizeOutput) =>
+            (updated(tree, currentPath, fileSizeOutput), currentPath)
+          case ((tree, currentPath), dirOutput: DirOutput) =>
+            (updated(tree, currentPath, dirOutput), currentPath)
+        }
+        println(
+          s"at ${acc._2} with ${next} got path ${stepRes._2} and tree\n${stepRes._1}"
+        )
+        stepRes
+      })
 
-    println(builtTree._1)
+    println("result:\n" + builtTree._1)
   }
 
   def updated(
@@ -69,29 +77,37 @@ object Main7Part1 {
       path: List[String],
       output: Output
   ): Directory = {
+    println(s"updating ${directory.name} with $output at $path")
+
     (path, output) match {
       case (Nil, _) =>
         output match {
           case FileSizeOutput(size, name) =>
+            println(s"updating leaf with file $name")
             directory.copy(files = directory.files :+ File(name, size))
           case DirOutput(name) =>
+            println(s"updating leaf with dir $name")
             directory.copy(dirs =
               directory.dirs :+ Directory(name, List.empty, List.empty)
             )
         }
-      case (head :: tail, _) if directory.dirs.exists(_.name == head) =>
-        val newDirs = directory.dirs.map {
-          case dir if dir.name == head => updated(dir, tail, output)
-          case other                   => other
-        }
-        directory.copy(dirs = newDirs)
       case (head :: tail, _) =>
-        val newDirs = directory.dirs :+ updated(
-          Directory(head, List.empty, List.empty),
-          tail,
-          output
-        )
-        directory.copy(dirs = newDirs)
+        directory.dirs.find(_.name == head) match {
+          case Some(dir) =>
+            directory.copy(
+              dirs = directory.dirs.map(d =>
+                if (d.name == head) updated(d, tail, output) else d
+              )
+            )
+          case None =>
+            directory.copy(
+              dirs = directory.dirs :+ updated(
+                Directory(head, List.empty, List.empty),
+                tail,
+                output
+              )
+            )
+        }
     }
   }
 }
