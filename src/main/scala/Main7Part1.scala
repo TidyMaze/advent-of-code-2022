@@ -24,11 +24,16 @@ object Main7Part1 {
       extends Tree {
     override def toString: String = {
       // tree as indented string
-      val filesStr = files.map(_.toString).map("  " + _).mkString("\n")
-      val dirsStr = dirs
-        .map(_.toString.split("\n").map("  " + _).mkString("\n"))
-        .mkString("\n")
-      s"$name\n$filesStr\n$dirsStr"
+      val filesStr =
+        if (files.isEmpty) ""
+        else files.map(_.toString).map("  " + _).mkString("\n") + "\n"
+      val dirsStr =
+        if (dirs.isEmpty) ""
+        else
+          dirs
+            .map(_.toString.split("\n").map("  " + _).mkString("\n"))
+            .mkString("\n") + "\n"
+      s"$name\n$filesStr$dirsStr"
     }
   }
 
@@ -41,7 +46,10 @@ object Main7Part1 {
   }
 
   def findDirectorySizes(directory: Directory): Map[String, Long] = {
-    directory.dirs.map(findDirectorySizes).flatten.toMap + (directory.name -> totalFileSize(directory))
+    directory.dirs
+      .map(findDirectorySizes)
+      .flatten
+      .toMap + (directory.name -> totalFileSize(directory))
   }
 
   def main(args: Array[String]): Unit = {
@@ -74,10 +82,10 @@ object Main7Part1 {
           case ((tree, currentPath), dirOutput: DirOutput) =>
             (updated(tree, currentPath, dirOutput), currentPath)
         }
-        println(
+//        println(
 //          s"at ${acc._2} with ${next} got path ${stepRes._2} and tree\n${stepRes._1}"
-          s"at ${acc._2} with ${next} got path ${stepRes._2}"
-        )
+//          s"at ${acc._2} with ${next} got path ${stepRes._2}"
+//        )
         stepRes
       })
 
@@ -98,7 +106,7 @@ object Main7Part1 {
       path: List[String],
       output: Output
   ): Directory = {
-    println(s"updating ${directory.name} with $output at $path")
+//    println(s"updating ${directory.name} with $output at $path")
 
     (path, output) match {
       case (Nil, _) =>
