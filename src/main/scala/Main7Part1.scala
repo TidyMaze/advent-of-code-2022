@@ -25,9 +25,20 @@ object Main7Part1 {
     override def toString: String = {
       // tree as indented string
       val filesStr = files.map(_.toString).map("  " + _).mkString("\n")
-      val dirsStr = dirs.map(_.toString.split("\n").map("  " + _).mkString("\n")).mkString("\n")
+      val dirsStr = dirs
+        .map(_.toString.split("\n").map("  " + _).mkString("\n"))
+        .mkString("\n")
       s"$name\n$filesStr\n$dirsStr"
     }
+  }
+
+  def findDirectorySizes(directory: Directory): Map[String, Long] = {
+    val filesSize = directory.files.map(_.size).sum
+    val childDirSizes =
+      directory.dirs.map(findDirectorySizes).foldLeft(Map.empty[String, Long]) {
+        case (acc, dirSizes) => acc ++ dirSizes
+      }
+    childDirSizes + (directory.name -> (filesSize + childDirSizes.values.sum))
   }
 
   def main(args: Array[String]): Unit = {
@@ -61,12 +72,19 @@ object Main7Part1 {
             (updated(tree, currentPath, dirOutput), currentPath)
         }
         println(
-          s"at ${acc._2} with ${next} got path ${stepRes._2} and tree\n${stepRes._1}"
+//          s"at ${acc._2} with ${next} got path ${stepRes._2} and tree\n${stepRes._1}"
+        s"at ${acc._2} with ${next} got path ${stepRes._2}"
         )
         stepRes
       })
 
     println("result:\n" + builtTree._1)
+
+    val directorySizes = findDirectorySizes(builtTree._1)
+
+    println("directory sizes:\n" + directorySizes)
+
+    println(directorySizes.filter(_._2 <= 100000).values.sum)
   }
 
   def updated(
