@@ -84,7 +84,10 @@ object Main7Part1 {
 
     println("directory sizes:\n" + directorySizes)
 
-    println(directorySizes.filter(_._2 <= 100000).values.sum)
+    val smallDirs = directorySizes.filter(_._2 <= 100000)
+    
+    println("small dirs:\n" + smallDirs)
+    println(smallDirs.values.sum)
   }
 
   def updated(
