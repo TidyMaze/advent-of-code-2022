@@ -31,8 +31,8 @@ object Main7Part1 {
     val allSizes = findAllDirectorySizes(parsed)
     println(allSizes)
 
-    val smallSizes = allSizes.filter(_._2 < 100000)
-    println(smallSizes)
+    val smallSizes = allSizes.filter(_._2 <= 100000)
+    println(smallSizes.toList.sortBy(_._2).reverse)
 
     val smallSizesSum = smallSizes.map(_._2).sum
     println(smallSizesSum)
@@ -53,8 +53,16 @@ object Main7Part1 {
       case Ls =>
       // do nothing
       case FileSizeOutput(size, name) =>
-        val allParentDirectories = currentDirectory.toList
-        allParentDirectories.foreach { dir =>
+        // list of all parent directory paths (ex: List("a", "b", "c") -> List("a", "a/b", "a/b/c"))
+        val allParentDirectoriesPaths = currentDirectory
+          .scanLeft("")((acc, next) =>
+            acc match {
+              case ""  => next
+              case "/" => s"/$next"
+              case _   => acc + "/" + next
+            }
+          )
+        allParentDirectoriesPaths.foreach { dir =>
           directorySizes(dir) = directorySizes.getOrElse(dir, 0L) + size
         }
       case DirOutput(name) =>
