@@ -10,7 +10,7 @@ object Main8Part2 {
     val width = grid.head.size
 
     computeScenicScore(grid, 2, 3)
-    
+
     println("")
 
     val gridScore = (0 until height).map { y =>
@@ -20,56 +20,69 @@ object Main8Part2 {
     }
 
     println("gridScore: " + gridScore)
+    
+    val biggestScore = gridScore.flatten.max
+    println("biggestScore: " + biggestScore)
   }
 
   def computeScenicScore(grid: List[List[Int]], x: Int, y: Int) = {
+    val currentTreeHeight = grid(y)(x)
+
     // compute view length from tree at (x, y), looking up
-    val viewUp = (y to 0 by -1).foldLeft((-1, 0)) {
-      case ((highest, viewLength), y) => {
-        val current = grid(y)(x)
-        if (current > highest) {
-          (current, viewLength + 1)
-        } else {
-          (highest, viewLength)
+    val viewUp = (y - 1 to 0 by -1)
+      .foldLeft((false, 0)) {
+        case ((true, count), _) => (true, count)
+        case ((false, count), cy) => {
+          val current = grid(cy)(x)
+          if (current < currentTreeHeight) {
+            (false, count + 1)
+          } else {
+            (true, count + 1)
+          }
         }
       }
-    }
 
     // compute view length from tree at (x, y), looking down
-    val viewDown = (y until grid.size).foldLeft((-1, 0)) {
-      case ((highest, viewLength), y) => {
-        val current = grid(y)(x)
-        if (current > highest) {
-          (current, viewLength + 1)
-        } else {
-          (highest, viewLength)
+    val viewDown = (y + 1 until grid.size)
+      .foldLeft((false, 0)) {
+        case ((true, count), _) => (true, count)
+        case ((false, count), cy) => {
+          val current = grid(cy)(x)
+          if (current < currentTreeHeight) {
+            (false, count + 1)
+          } else {
+            (true, count + 1)
+          }
         }
       }
-    }
 
     // compute view length from tree at (x, y), looking left
-    val viewLeft = (x to 0 by -1).foldLeft((-1, 0)) {
-      case ((highest, viewLength), x) => {
-        val current = grid(y)(x)
-        if (current > highest) {
-          (current, viewLength + 1)
-        } else {
-          (highest, viewLength)
+    val viewLeft = (x - 1 to 0 by -1)
+      .foldLeft((false, 0)) {
+        case ((true, count), _) => (true, count)
+        case ((false, count), cx) => {
+          val current = grid(y)(cx)
+          if (current < currentTreeHeight) {
+            (false, count + 1)
+          } else {
+            (true, count + 1)
+          }
         }
       }
-    }
 
     // compute view length from tree at (x, y), looking right
-    val viewRight = (x until grid.head.size).foldLeft((-1, 0)) {
-      case ((highest, viewLength), x) => {
-        val current = grid(y)(x)
-        if (current > highest) {
-          (current, viewLength + 1)
-        } else {
-          (highest, viewLength)
+    val viewRight = (x + 1 until grid.head.size)
+      .foldLeft((false, 0)) {
+        case ((true, count), _) => (true, count)
+        case ((false, count), cx) => {
+          val current = grid(y)(cx)
+          if (current < currentTreeHeight) {
+            (false, count + 1)
+          } else {
+            (true, count + 1)
+          }
         }
       }
-    }
 
     val scenicScore = viewUp._2 * viewDown._2 * viewLeft._2 * viewRight._2
     println(
