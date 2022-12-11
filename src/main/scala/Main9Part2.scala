@@ -103,10 +103,10 @@ object Main9Part2 {
           val newTailVisited = tailVisited + newKnots.last
 
           println(
-            s"After instruction $direction $distance, new head coord is $newHeadCoord, new tail coord is ${newKnots.last}, new tail visited is $newTailVisited"
+            s"After instruction $direction $distance, new head coord is $newHeadCoord, new tail coord is ${newKnots.last}, new tail visited has size ${newTailVisited.size}"
           )
           val newKnotsList = newKnots.toList
-          println(showVisited(newTailVisited, newKnotsList))
+//          println(showVisited(newTailVisited, newKnotsList))
           (newKnotsList, newTailVisited)
         }
       }
